@@ -5,6 +5,8 @@ import argparse
 import json
 
 APPID = 'cc2635d0b3d737c74a482d95669f0180'
+CURRENT_WEATHER = 'http://api.openweathermap.org/data/2.5/weather'
+WEEK_FORECAST = 'https://api.openweathermap.org/data/2.5/onecall?exclude=minutely,hourly'
 
 def createParser():
     parser = argparse.ArgumentParser()
@@ -17,21 +19,19 @@ parser = createParser()
 namespace = parser.parse_args(sys.argv[1:])
 
 def currentWeather():
-    current = requests.get('http://api.openweathermap.org/data/2.5/weather',
-                        params={'q': namespace.city, 'units': 'metric', 'appid': APPID, 'lang': 'RU'}).json()
+    current = requests.get(CURRENT_WEATHER,
+                           params={'q': namespace.city, 'units': 'metric', 'appid': APPID, 'lang': 'RU'}).json()
     return current
 
 def showCurrentWeather(current):
-    print(
-        f'''Текущая температура в городе {current['name']},{current['sys']['country']} составляет {current['main']['temp']}, {current['weather'][0]['description']}
+    print(f'''Текущая температура в городе {current['name']},{current['sys']['country']} составляет {current['main']['temp']}, {current['weather'][0]['description']}
 Ощущается как {current['main']['feels_like']}
 Скоросто ветра: {current['wind']['speed']}
 ''')
 
 def weekForecast(json):
-    json_forecast = requests.get('https://api.openweathermap.org/data/2.5/onecall?exclude=minutely,hourly',
-                                 params={'lat': json['coord']['lat'], 'lon': json['coord']['lon'], 'appid': APPID,
-                                         'units': 'metric', 'lang': 'RU'}).json()
+    json_forecast = requests.get(WEEK_FORECAST, params={'lat': json['coord']['lat'], 'lon': json['coord']['lon'],
+                                                        'appid': APPID,'units': 'metric', 'lang': 'RU'}).json()
     return json_forecast
 
 def showWeather(json, json_forecast, date, i):
@@ -41,7 +41,6 @@ def showWeather(json, json_forecast, date, i):
     Скорость ветра: {json_forecast['daily'][i]['wind_speed']}
     Осадки: {json_forecast['daily'][i]['weather'][0]['description']}
     УФ-индекс: {json_forecast['daily'][i]['uvi']}\n''')
-
 
 def showWeekForecast(json, json_forecast):
     for _ in range(len(json_forecast['daily'])):
