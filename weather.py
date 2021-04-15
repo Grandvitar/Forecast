@@ -18,9 +18,25 @@ def createParser():
 parser = createParser()
 namespace = parser.parse_args(sys.argv[1:])
 
+def checkNamespace():
+    if namespace.city.isalpha():
+        if namespace.date is not None:
+            try:
+                datetime.datetime.strptime(namespace.date, '%d.%m.%Y')
+            except ValueError:
+                print('Неверный формат даты')
+                return False
+        return True
+    else:
+        print('Введите город правильно')
+        return False
+
 def currentWeather():
-    current = requests.get(CURRENT_WEATHER,
+    try:
+        current = requests.get(CURRENT_WEATHER,
                            params={'q': namespace.city, 'units': 'metric', 'appid': APPID, 'lang': 'RU'}).json()
+    except Exception as e:
+        print(e)
     return current
 
 def showCurrentWeather(current):
